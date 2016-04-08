@@ -71,6 +71,7 @@ Local<Array> execLocalizeImage(const std::string& userID, const std::string& kMa
 		const std::vector<double>& center=std::vector<double>(), double radius=-1.0) {
 	// scale input image if option is set
 	cv::Mat image;
+
 	if (scaleImage==1.0) {
 		image = _image;
 	} else {
@@ -126,9 +127,21 @@ Local<Array> execLocalizeImage(const std::string& userID, const std::string& kMa
 			storage["dist"] >> intrinsicDist;
 			storage.release();
 		}
+
+
 		cv::Size imageSize = cv::Size(image.cols, image.rows);
+
+
+
+		cout << "debug 0 " << scaleImage << endl;
+		cout << "intrinsicK" << intrinsicK << endl;
+		cout << "intrinsicDist" << intrinsicDist << endl;
+		cout << "imageSize" << imageSize << endl;
+
 		newCameraMat = cv::getOptimalNewCameraMatrix(intrinsicK, intrinsicDist, imageSize,
 				1.0, imageSize, &validRoi);
+		cout << "debug 1 " << scaleImage << endl;
+
 		cv::initUndistortRectifyMap(intrinsicK, intrinsicDist, cv::Mat(),
 				newCameraMat, imageSize, CV_16SC2, mapx, mapy);
 
@@ -484,6 +497,84 @@ Handle<Value> LocalizeImagePathBeacon(const Arguments& args) {
 	return scope.Close(result);
 }
 
+Handle<Value> LocalizeAndGetBoundedFeatures(const Arguments& args) {
+	HandleScope scope;
+
+	if (args.Length() != 10 && args.Length() != 12) {
+		ThrowException(
+				Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+	if (!args[0]->IsString() || !args[1]->IsString() || !args[2]->IsString()
+		|| !args[3]->IsNumber() || !args[4]->IsString() || !args[5]->IsString()
+		|| !args[6]->IsString() || !args[7]->IsString() || !args[8]->IsString()
+		|| !args[9]->IsString()) {
+		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+		return scope.Close(Undefined());
+	}
+
+	Local<String> userID = args[0]->ToString();
+	char userIDChar[userID->Length()];
+	userID->WriteUtf8(userIDChar);
+
+	Local<String> kMatFile = args[1]->ToString();
+	char kMatFileChar[kMatFile->Length()];
+	kMatFile->WriteUtf8(kMatFileChar);
+
+	Local<String> distMatFile = args[2]->ToString();
+	char distMatFileChar[distMatFile->Length()];
+	distMatFile->WriteUtf8(distMatFileChar);
+
+	double scaleImage = args[3]->NumberValue();
+
+	Local<String> mapID = args[4]->ToString();
+	char mapIDChar[mapID->Length()];
+	mapID->WriteUtf8(mapIDChar);
+
+	Local<String> sfmDataDir = args[5]->ToString();
+	char sfmDataDirChar[sfmDataDir->Length()];
+	sfmDataDir->WriteUtf8(sfmDataDirChar);
+
+	Local<String> matchDir = args[6]->ToString();
+	char matchDirChar[matchDir->Length()];
+	matchDir->WriteUtf8(matchDirChar);
+
+	Local<String> aMatFile = args[7]->ToString();
+	char aMatFileChar[aMatFile->Length()];
+	aMatFile->WriteUtf8(aMatFileChar);
+
+	Local<String> imagePath = args[8]->ToString();
+	char imagePathChar[imagePath->Length()];
+	imagePath->WriteUtf8(imagePathChar);
+	cv::Mat image = cv::imread(std::string(imagePathChar), cv::IMREAD_COLOR);
+	if (image.empty() || image.rows==0 || image.cols==0) {
+		ThrowException(Exception::TypeError(String::New("Input image is empty")));
+		return scope.Close(Undefined());
+	}
+
+	Local<String> beaconStr = args[9]->ToString();
+	char beaconStrChar[beaconStr->Length()];
+	beaconStr->WriteUtf8(beaconStrChar);
+
+	Local<Array> result;
+	if (args.Length() == 10) {
+		result = execLocalizeImage(std::string(userIDChar), std::string(kMatFileChar), std::string(distMatFileChar),
+					std::string(mapIDChar), std::string(sfmDataDirChar), std::string(matchDirChar), std::string(aMatFileChar),
+					scaleImage, image, std::string(beaconStrChar));
+	} else {
+		Local<Array> center = Array::Cast(*args[10]);
+		std::vector<double> centerVec;
+	    for(int i = 0; i < center->Length(); i++) {
+	    	centerVec.push_back(center->Get(i)->NumberValue());
+	    }
+	    double radius = args[11]->NumberValue();
+	    result = execLocalizeImage(std::string(userIDChar), std::string(kMatFileChar), std::string(distMatFileChar),
+	    			std::string(mapIDChar), std::string(sfmDataDirChar), std::string(matchDirChar), std::string(aMatFileChar),
+					scaleImage, image, std::string(beaconStrChar), centerVec, radius);
+	}
+	return scope.Close(result);
+}
+
 void Init(Handle<Object> exports) {
 	exports->Set(String::NewSymbol("localizeImageBuffer"),
 			FunctionTemplate::New(LocalizeImageBuffer)->GetFunction());
@@ -492,7 +583,9 @@ void Init(Handle<Object> exports) {
 	exports->Set(String::NewSymbol("localizeImageBufferBeacon"),
 			FunctionTemplate::New(LocalizeImageBufferBeacon)->GetFunction());
 	exports->Set(String::NewSymbol("localizeImagePathBeacon"),
-			FunctionTemplate::New(LocalizeImagePathBeacon)->GetFunction());
+                     FunctionTemplate::New(LocalizeImagePathBeacon)->GetFunction());
+	exports->Set(String::NewSymbol("localizeAndGetBoundedFeatures"),
+                     FunctionTemplate::New(LocalizeAndGetBoundedFeatures)->GetFunction());
 }
 
 NODE_MODULE(localizeImage, Init)

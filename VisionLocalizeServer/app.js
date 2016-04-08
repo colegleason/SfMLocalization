@@ -27,8 +27,9 @@
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
-  , map = require('./routes/map')  
+  , map = require('./routes/map')
   , localize = require('./routes/localize')
+  , bounding = require('./routes/bounding')
   , http = require('http')
   , path = require('path')
   ;
@@ -64,6 +65,7 @@ app.get('/map/camera', map.camera);
 app.get('/map/dense', map.dense);
 app.get('/localize', localize.estimateGet);
 app.post('/localize', localize.estimatePost);
+app.post('/bounding', bounding.estimatePost);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

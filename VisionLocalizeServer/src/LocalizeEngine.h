@@ -37,6 +37,9 @@
 #include "PcaWrapper.h"
 #include "BoFSpatialPyramids.h"
 
+typedef pair<Vec2, Vec2> BoundingBox;
+typedef std::vector<std::vector<Vec3>> BoundingBoxResult;
+
 class LocalizeEngine {
 private:
 	std::string mSfmDataDir;
@@ -69,6 +72,7 @@ private:
 			const std::string& outputFolder, const hulo::AKAZEOption &akazeOption, std::vector<std::pair<float, float>> &locFeat);
 
 public:
+
 	LocalizeEngine();
 	LocalizeEngine(const std::string sfmDataDir, const std::string matchDir, const std::string AmatFile,
 			double secondTestRatio, int ransacRound, double ransacPrecision, bool guidedMatching,
@@ -76,4 +80,5 @@ public:
 
 	std::vector<double> localize(const cv::Mat& image, const std::string workingDir, const std::string& beaconStr,
 			const std::vector<double>& center=std::vector<double>(), double radius=-1.0);
+        BoundingBoxResult localizeAndGetBoundedFeatures(const cv::Mat& image, const std::string workingDir, std::vector<BoundingBox>& boundingBoxes);
 };
