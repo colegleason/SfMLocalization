@@ -174,7 +174,6 @@ $(document).ready(function(){
 	loader.addEventListener( 'load', function ( event ) {
 	    var geometry = event.content;
             flattenPoints(geometry);
-            console.log(geometry);
 	    var materials = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors, transparent: true } );
 	    var particles = new THREE.PointCloud(geometry, materials);
 	    particles.colors = event.content.colors;
