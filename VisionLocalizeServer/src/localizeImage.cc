@@ -584,8 +584,8 @@ void Init(Handle<Object> exports) {
 			FunctionTemplate::New(LocalizeImageBufferBeacon)->GetFunction());
 	exports->Set(String::NewSymbol("localizeImagePathBeacon"),
                      FunctionTemplate::New(LocalizeImagePathBeacon)->GetFunction());
-	exports->Set(String::NewSymbol("localizeAndGetBoundedFeatures"),
-                     FunctionTemplate::New(LocalizeAndGetBoundedFeatures)->GetFunction());
+	exports->Set(String::NewSymbol("getBoundedFeatures"),
+                     FunctionTemplate::New(getBoundedFeatures)->GetFunction());
 }
 
 NODE_MODULE(localizeImage, Init)

@@ -37,8 +37,8 @@
 #include "PcaWrapper.h"
 #include "BoFSpatialPyramids.h"
 
-typedef pair<Vec2, Vec2> BoundingBox;
-typedef std::vector<std::vector<Vec3>> BoundingBoxResult;
+typedef pair<openMVG::Vec2, openMVG::Vec2> BoundingBox;
+typedef std::vector<std::vector<openMVG::Vec3>> BoundingBoxResult;
 
 class LocalizeEngine {
 private:
@@ -80,5 +80,5 @@ public:
 
 	std::vector<double> localize(const cv::Mat& image, const std::string workingDir, const std::string& beaconStr,
 			const std::vector<double>& center=std::vector<double>(), double radius=-1.0);
-        BoundingBoxResult localizeAndGetBoundedFeatures(const cv::Mat& image, const std::string workingDir, std::vector<BoundingBox>& boundingBoxes);
+        BoundingBoxResult getBoundedFeatures(const cv::Mat& image, const std::string workingDir, std::vector<BoundingBox>& boundingBoxes);
 };

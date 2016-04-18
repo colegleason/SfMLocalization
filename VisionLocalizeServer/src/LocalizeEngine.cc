@@ -24,7 +24,6 @@
 
 #include <uuid/uuid.h>
 #include <omp.h>
-#include <tuple.h>
 
 #include <openMVG/features/regions.hpp>
 #include <openMVG/features/regions_factory.hpp>
@@ -545,10 +544,10 @@ std::vector<double> LocalizeEngine::localize(const cv::Mat& image, const std::st
     return result;
 }
 
-BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& image, const std::string workingDir.
-                                                                std::vector<BoundingBox> boundingBoxes)
+BoundingBoxResult LocalizeEngine::getBoundedFeatures(const cv::Mat& image, const std::string workingDir,
+                                                                std::vector<BoundingBox>& boundingBoxes)
 {
-    vector<double> result;
+    BoundingBoxResult result;
     double startQuery = (double) getTickCount();
 
     // find restricted views if center and radius are specified
@@ -663,7 +662,6 @@ BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& i
         mRegionsProvider->regions_per_view.erase(indQueryFile);
 
         cout << "Load SfM views : " << (loadSfmViews - startQuery) / getTickFrequency() << " s\n";
-        cout << "Select views by BoW : " << (selectViewsByBow - selectViewsByBeacon) / getTickFrequency() << " s\n";
         cout << "Load image describer : " << (loadImageDescriber - selectViewsByBow) / getTickFrequency() << " s\n";
         cout << "Generate UUID : " << (generateUUID - loadImageDescriber) / getTickFrequency() << " s\n";
         cout << "Extract feature from query image : " << (endFeat - generateUUID) / getTickFrequency() << " s\n";
@@ -689,8 +687,6 @@ BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& i
         mRegionsProvider->regions_per_view.erase(indQueryFile);
 
         cout << "Load SfM views : " << (loadSfmViews - startQuery) / getTickFrequency() << " s\n";
-        cout << "Select views by iBeacon : " << (selectViewsByBeacon - loadSfmViews) / getTickFrequency() << " s\n";
-        cout << "Select views by BoW : " << (selectViewsByBow - selectViewsByBeacon) / getTickFrequency() << " s\n";
         cout << "Load image describer : " << (loadImageDescriber - selectViewsByBow) / getTickFrequency() << " s\n";
         cout << "Generate UUID : " << (generateUUID - loadImageDescriber) / getTickFrequency() << " s\n";
         cout << "Extract feature from query image : " << (endFeat - generateUUID) / getTickFrequency() << " s\n";
@@ -714,8 +710,12 @@ BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& i
     hulo::matchProviderToMatchSet(matches_provider, mMapViewFeatTo3D, mapFeatTo3DFeat, featDist);
     cout << "mapFeatTo3DFeat size = " << mapFeatTo3DFeat.size() << endl;
 
+    // get intrinsic
+    const Intrinsics::const_iterator iterIntrinsic_I = mSfmData.GetIntrinsics().find(0);
+    Pinhole_Intrinsic *cam_I = dynamic_cast<Pinhole_Intrinsic*>(iterIntrinsic_I->second.get());
+
     // find points in bounding boxes and save up results
-    BoundingBoxResult result(boundingBoxes.size());
+    Landmarks landmarks = mSfmData.GetLandmarks();
     for(std::vector<BoundingBox>::iterator it = boundingBoxes.begin(); it != boundingBoxes.end(); ++it) {
         Vec2 topLeft = it->first,
             bottomRight = it->second;
@@ -727,11 +727,17 @@ BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& i
                                 qFeatLoc[iterfeatId->first].second };
             Vec2 loc2d =  cam_I->get_ud_pixel(feat);
             // check if point is within the current bounding box
-            if ( (topLeft(0) <= loc2d(0) <= bottomRight(0)) &&
-                 (topLeft(1) <= loc2d(1) <= bottomRight(1)) ) {
+            if ( (topLeft(0) <= loc2d(0) && loc2d(0) <= bottomRight(0)) &&
+                 (topLeft(1) <= loc2d(1) && loc2d(1) <= bottomRight(1)) ) {
                 // if so, we will need to look up it's 3D location
-                Vec3 loc3d = mSfmData.GetLandmarks().at(iterfeatId->second).X;
-                boxResults.push_back(loc3d);
+                Vec3 loc3d = landmarks.at(iterfeatId->second).X;
+                cv::Mat pos3d(4, 1, CV_64F);
+                pos3d.at<double>(0) = loc3d[0];
+                pos3d.at<double>(1) = loc3d[1];
+                pos3d.at<double>(2) = loc3d[2];
+                pos3d.at<double>(3) = 1.0;
+                cv::Mat global = mA*pos3d;
+                boxResults.push_back(Vec3{global.at<double>(0), global.at<double>(1), global.at<double>(2)});
             }
         }
         result.push_back(boxResults);
@@ -743,8 +749,6 @@ BoundingBoxResult LocalizeEngine::localizeAndGetBoundedFeatures(const cv::Mat& i
 
     double endQuery = (double) getTickCount();
     cout << "Load SfM views : " << (loadSfmViews - startQuery) / getTickFrequency() << " s\n";
-    cout << "Select views by iBeacon : " << (selectViewsByBeacon - loadSfmViews) / getTickFrequency() << " s\n";
-    cout << "Select views by BoW : " << (selectViewsByBow - selectViewsByBeacon) / getTickFrequency() << " s\n";
     cout << "Load image describer : " << (loadImageDescriber - selectViewsByBow) / getTickFrequency() << " s\n";
     cout << "Generate UUID : " << (generateUUID - loadImageDescriber) / getTickFrequency() << " s\n";
     cout << "Extract feature from query image : " << (endFeat - generateUUID) / getTickFrequency() << " s\n";
