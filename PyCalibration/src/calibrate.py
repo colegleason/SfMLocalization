@@ -73,7 +73,7 @@ def main():
             if found:
                 term = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_COUNT, 30, 0.1)
                 corners2 = cv2.cornerSubPix(gray, corner, (5,5), (-1,-1), term)
-                im = cv2.drawChessboardCorners(im, pattern_size, corners2, found)
+                cv2.drawChessboardCorners(im, pattern_size, corners2, found)
                 img_points.append(corner.reshape(-1, 2))
                 obj_points.append(pattern_points)
             if not found:
