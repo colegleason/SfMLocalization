@@ -91,6 +91,7 @@ def convertNumpyMatTxt2OpenCvMatYml(numpyMatFile,openCVMatFile,matName):
     
     # write header
     f.write("%YAML:1.0" + "\n")
+    f.write("---" + "\n")
     f.write(matName + ": !!opencv-matrix" + "\n")
     f.write("   rows: " + str(mat.shape[0]) + "\n")
     if len(mat.shape)>1:
