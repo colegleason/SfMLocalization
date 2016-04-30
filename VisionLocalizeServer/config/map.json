@@ -9,6 +9,69 @@
   		"camera_ply_file":"/home/ishihara/test/CMU-video-data-undistort/NSH-4F-QOLT-merge/Output/SfM/reconstruction/global/colorized_global_camera.ply"
   	},
   	{
+  		"name":"cole-qolt",
+  		"sfm_data_dir":"/home/cole/models/cole-qolt/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cole/models/cole-qolt/Output/matches",
+  		"a_mat_file":"/home/cole/models/cole-qolt/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cole/models/cole-qolt/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cole/models/cole-qolt/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cole/models/cole-qolt/Output/SfM/reconstruction/global/colorized_global.ply"
+  	},
+  	{
+  		"name":"cmu-entropy-chips",
+  		"sfm_data_dir":"/home/cmaccess/uc-chips/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/uc-chips/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/uc-chips/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/uc-chips/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/uc-chips/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/uc-chips/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
+  		"name":"cmu-entropy-peanuts",
+  		"sfm_data_dir":"/home/cmaccess/SfMModels/uc-peanut/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/SfMModels/uc-peanut/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/SfMModels/uc-peanut/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/SfMModels/uc-peanut/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/SfMModels/uc-peanut/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/SfMModels/uc-peanut/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
+  		"name":"cmu-entropy-chips2",
+  		"sfm_data_dir":"/home/cmaccess/SfMModels/uc-chips/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/SfMModels/uc-chips/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/SfMModels/uc-chips/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/SfMModels/uc-chips/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/SfMModels/uc-chips/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/SfMModels/uc-chips/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
+  		"name":"cmu-entropy-chips3",
+  		"sfm_data_dir":"/home/cmaccess/SfMModels/uc-chips2/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/SfMModels/uc-chips2/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/SfMModels/uc-chips2/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/SfMModels/uc-chips2/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/SfMModels/uc-chips2/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/SfMModels/uc-chips2/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
+  		"name":"cmu-shelf-office",
+  		"sfm_data_dir":"/home/cmaccess/SfMModels/shelf_office/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/SfMModels/shelf_office/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/SfMModels/shelf_office/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/SfMModels/shelf_office/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/SfMModels/shelf_office/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/SfMModels/shelf_office/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
+  		"name":"cmu-shelf-office2",
+  		"sfm_data_dir":"/home/cmaccess/SfMModels/shelf_office2/Output/final/Output/SfM/reconstruction/global",
+  		"match_dir":"/home/cmaccess/SfMModels/shelf_office2/Output/final/Output/matches",
+  		"a_mat_file":"/home/cmaccess/SfMModels/shelf_office2/Ref/Amat.yml",
+  		"structure_ply_file":"/home/cmaccess/SfMModels/shelf_office2/Output/final/Output/SfM/reconstruction/global/colorized_global_structure.ply",
+  		"camera_ply_file":"/home/cmaccess/SfMModels/shelf_office2/Output/final/Output/SfM/reconstruction/global/colorized_global_camera.ply",
+                "dense_ply_file":"/home/cmaccess/SfMModels/shelf_office2/MVE/surface-L2-clean-ascii-global.ply"
+  	},
+  	{
   		"name":"thinklab-hakozaki",
   		"sfm_data_dir":"/home/ishihara/test/ThinkLabHakozaki-undistort/Output/final/Output/SfM/reconstruction/global",
   		"match_dir":"/home/ishihara/test/ThinkLabHakozaki-undistort/Output/final/Output/matches",

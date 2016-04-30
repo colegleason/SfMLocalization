@@ -76,11 +76,15 @@ exports.estimatePost = function(req, res) {
     var boundingBoxError = false;
     var boundingBoxes = [];
     req.body.bounding.forEach(function(boundingBox) {
+        if (typeof boundingBox == "string") {
+            boundingBox = JSON.parse(boundingBox);
+        }
         if (!Array.isArray(boundingBox) || boundingBox.length != 4) {
             boundingBoxError = true;
         }
         boundingBoxes = boundingBoxes.concat(boundingBox);
     });
+
     if (boundingBoxError) {
     	console.log('Error : Bounding boxes have incorrect format');
         return sendErrorResponse(404, 'Bouding boxes have incorrect format');
@@ -92,7 +96,6 @@ exports.estimatePost = function(req, res) {
         console.log('Error : Bounding points cannot be negative');
         return sendErrorResponse(404, 'Bouding boxes points cannot be negative');
     }
-    console.log(boundingBoxes);
     // check user parameter
     if (!share.userNameMap[req.body.user]) {
     	console.log('Error : User ID is not valid');
@@ -138,13 +141,13 @@ exports.estimatePost = function(req, res) {
                     jsonObj['boundingBoxResults'].push(reshapedPoints);
                 });
                 // update users' history
-                if (!share.userHistories[req.body.user]) {
-                    share.userHistories[req.body.user] = [];
+                if (!share.boundingHistories[req.body.user]) {
+                    share.boundingHistories[req.body.user] = [];
                 }
-                if (share.userHistories[req.body.user].length>MAX_USER_HISTORY_LENGTH) {
-                    share.userHistories[req.body.user].shift();
+                if (share.boundingHistories[req.body.user].length>MAX_USER_HISTORY_LENGTH) {
+                    share.boundingHistories[req.body.user].shift();
                 }
-                share.userHistories[req.body.user].push(jsonObj);
+                share.boundingHistories[req.body.user].push(jsonObj);
             } else {
                 jsonObj = [];
             }
@@ -160,4 +163,32 @@ exports.estimatePost = function(req, res) {
         res.write(result);
         res.end();
     });
+};
+
+
+exports.history = function(req, res){
+    var sendErrorResponse = function(code, message) {
+        res.statusCode = code;
+        res.setHeader("Content-Type", "application/json");
+        res.write(JSON.stringify({
+            message : message
+        }));
+        res.end();
+    };
+    if (!req.query.name) {
+    	console.log('Error : User ID is not specified');
+    	return sendErrorResponse(404, 'User ID is not specified');
+    }
+    if (!share.boundingHistories[req.query.name]) {
+	console.log('Error : User ID is not valid');
+	return sendErrorResponse(500, 'User ID is not valid');
+    }
+    res.writeHead(200, {
+	'Access-Control-Allow-Origin': '*',
+	'Content-Type': 'application/json'
+    });
+    var json = JSON.stringify({
+	history: share.boundingHistories[req.query.name]
+    });
+    res.end(json);
 };

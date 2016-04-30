@@ -24,13 +24,13 @@
  * GET or POST image for localization.
  */
 
-var validator = require('validator'), async = require('async'), request = require('request'), fs = require('fs'), 
+var validator = require('validator'), async = require('async'), request = require('request'), fs = require('fs'),
 	localizeImage = require('bindings')('localizeImage'), share = require('../lib/share');
 
 var MAX_USER_HISTORY_LENGTH = 10;
 
 /*
- * GET parameters 
+ * GET parameters
  *  user : ID of user
  * 	map : ID of map
  * 	image : URL of request image
@@ -69,7 +69,7 @@ exports.estimateGet = function(req, res) {
     	console.log('Error : Image URL is not valid');
         return sendErrorResponse(404, 'Image URL is not valid');
     }
-        
+
     // check user parameter
     if (!share.userNameMap[req.query.user]) {
     	console.log('Error : User ID is not valid');
@@ -78,7 +78,7 @@ exports.estimateGet = function(req, res) {
     var kMatFile = share.userNameMap[req.query.user]['k_mat_file'];
     var distMatFile = share.userNameMap[req.query.user]['dist_mat_file'];
     var scaleImage = share.userNameMap[req.query.user]['scale_image'];
-    
+
     // check map parameter
     if (!share.mapNameMap[req.query.map]) {
     	console.log('Error : Map ID is not valid');
@@ -87,7 +87,7 @@ exports.estimateGet = function(req, res) {
 	var sfmDataDir = share.mapNameMap[req.query.map]['sfm_data_dir'];
 	var matchDir = share.mapNameMap[req.query.map]['match_dir'];
 	var aMatFile = share.mapNameMap[req.query.map]['a_mat_file'];
-	    
+
     async.waterfall([ function(callback) {
         var requestSettings = {
             method : 'GET',
@@ -110,25 +110,25 @@ exports.estimateGet = function(req, res) {
 	        			req.query.map, sfmDataDir, matchDir, aMatFile, image, req.query.beacon,
 	        			[req.query.cx, req.query.cy, req.query.cz], req.query.radius);
 	        } else {
-	        	result = localizeImage.localizeImageBufferBeacon(req.query.user, kMatFile, distMatFile, scaleImage,
-	        			req.query.map, sfmDataDir, matchDir, aMatFile, image, req.query.beacon);
+	            result = localizeImage.localizeImageBufferBeacon(req.query.user, kMatFile, distMatFile, scaleImage,
+	        			                             req.query.map, sfmDataDir, matchDir, aMatFile, image, req.query.beacon);
 	        }
         } else {
 	        if (req.query.cx && req.query.cy && req.query.cz && req.query.radius) {
 	        	result = localizeImage.localizeImageBuffer(req.query.user, kMatFile, distMatFile, scaleImage,
-	        			req.query.map, sfmDataDir, matchDir, aMatFile, image, 
+	        			req.query.map, sfmDataDir, matchDir, aMatFile, image,
 	        			[req.query.cx, req.query.cy, req.query.cz], req.query.radius);
 	        } else {
 	        	result = localizeImage.localizeImageBuffer(req.query.user, kMatFile, distMatFile, scaleImage,
 	        			req.query.map, sfmDataDir, matchDir, aMatFile, image);
 	        }
         }
-        
+
         console.log('localization result : ' + result);
         var jsonObj;
         if (result && result.length>0) {
         	jsonObj = {'estimate':{'t':result.slice(0,3), 'R':[result.slice(4,7),result.slice(7,9),result.slice(9,12)]}};
-        	
+
             // update users' history
         	if (!share.userHistories[req.query.user]) {
         		share.userHistories[req.query.user] = [];
@@ -137,8 +137,8 @@ exports.estimateGet = function(req, res) {
         } else {
             jsonObj = {'estimate':{'t':[], 'R':[]}};
         }
-       	// Send back the result as a JSON                    
-        callback(null, JSON.stringify(jsonObj));        
+       	// Send back the result as a JSON
+        callback(null, JSON.stringify(jsonObj));
     } ], function(err, result) {
         if (err) {
             sendErrorResponse(500, err.message);
@@ -151,7 +151,7 @@ exports.estimateGet = function(req, res) {
 };
 
 /*
- * POST parameters 
+ * POST parameters
  *  user : ID of user
  * 	map : ID of map
  *  image : binary image data
@@ -182,7 +182,7 @@ exports.estimatePost = function(req, res) {
     	console.log('Error : Image data is not specified');
         return sendErrorResponse(404, "Image data is not specified");
     }
-        
+
     // check user parameter
     if (!share.userNameMap[req.body.user]) {
     	console.log('Error : User ID is not valid');
@@ -190,7 +190,7 @@ exports.estimatePost = function(req, res) {
     }
     var kMatFile = share.userNameMap[req.body.user]['k_mat_file'];
     var distMatFile = share.userNameMap[req.body.user]['dist_mat_file'];
-    
+
     // check map parameter
     if (!share.mapNameMap[req.body.map]) {
     	console.log('Error : Map ID is not valid');
@@ -200,7 +200,7 @@ exports.estimatePost = function(req, res) {
 	var matchDir = share.mapNameMap[req.body.map]['match_dir'];
 	var aMatFile = share.mapNameMap[req.body.map]['a_mat_file'];
     var scaleImage = share.userNameMap[req.body.user]['scale_image'];
-    
+
     async.waterfall([ function(callback) {
         fs.readFile(req.files.image.path, function (err, data) {
             var imageName = req.files.image.name;
@@ -213,7 +213,7 @@ exports.estimatePost = function(req, res) {
                 if (req.body.beacon) {
                     if (req.body.cx && req.body.cy && req.body.cz && req.body.radius) {
                         result = localizeImage.localizeImageBufferBeacon(req.body.user, kMatFile, distMatFile, scaleImage,
-                        		req.body.map, sfmDataDir, matchDir, aMatFile, 
+                        		req.body.map, sfmDataDir, matchDir, aMatFile,
                         		data, req.body.beacon, [req.body.cx, req.body.cy, req.body.cz], req.body.radius);
                     } else {
                         result = localizeImage.localizeImageBufferBeacon(req.body.user, kMatFile, distMatFile, scaleImage,
@@ -222,19 +222,19 @@ exports.estimatePost = function(req, res) {
                 } else {
 	                if (req.body.cx && req.body.cy && req.body.cz && req.body.radius) {
 	                    result = localizeImage.localizeImageBuffer(req.body.user, kMatFile, distMatFile, scaleImage,
-	                    		req.body.map, sfmDataDir, matchDir, aMatFile, 
+	                    		req.body.map, sfmDataDir, matchDir, aMatFile,
 	                    		data, [req.body.cx, req.body.cy, req.body.cz], req.body.radius);
 	                } else {
 	                    result = localizeImage.localizeImageBuffer(req.body.user, kMatFile, distMatFile, scaleImage,
 	                    		req.body.map, sfmDataDir, matchDir, aMatFile, data);
 	                }
                 }
-                
+
                 console.log('localization result : ' + result);
                 var jsonObj;
                 if (result && result.length>0) {
-                	jsonObj = {'estimate':{'t':result.slice(0,3), 'R':[result.slice(3,6),result.slice(6,9),result.slice(9,12)]}};
-                	
+                    jsonObj = {'estimate':{'t':result.slice(0,3), 'R':[result.slice(3,6),result.slice(6,9),result.slice(9,12)]}};
+
                     // update users' history
                 	if (!share.userHistories[req.body.user]) {
                 		share.userHistories[req.body.user] = [];
@@ -246,7 +246,7 @@ exports.estimatePost = function(req, res) {
                 } else {
                     jsonObj = {'estimate':{'t':[], 'R':[]}};
                 }
-               	// Send back the result as a JSON                    
+               	// Send back the result as a JSON
                 callback(null, JSON.stringify(jsonObj));
             }
         });

@@ -1,4 +1,5 @@
 %YAML:1.0
+---
 dist: !!opencv-matrix
    rows: 5
    cols: 1

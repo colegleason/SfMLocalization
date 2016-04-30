@@ -1,4 +1,4 @@
-var fs = require('fs');	
+var fs = require('fs');
 
 var CONFIG_MAP_JSON_FILE = '/config/map.json';
 var CONFIG_USER_JSON_FILE = '/config/user.json';
@@ -37,7 +37,7 @@ for (var i=0; i<mapJson['maps'].length; i++) {
 		console.log("sfm data dir : " + mapJson['maps'][i]['sfm_data_dir']);
 		console.log("match dir : " + mapJson['maps'][i]['match_dir']);
 		console.log("A mat file : " + mapJson['maps'][i]['a_mat_file']);
-		
+
 		mapNameMap[mapJson['maps'][i]['name']] = {};
 		for (var p in mapJson['maps'][i]) {
 			mapNameMap[mapJson['maps'][i]['name']][p] = mapJson['maps'][i][p];
@@ -58,7 +58,7 @@ for (var i=0; i<userJson['users'].length; i++) {
 		console.log("user name : " + userJson['users'][i]['name']);
 		console.log("K mat file : " + userJson['users'][i]['k_mat_file']);
 		console.log("Dist mat file : " + userJson['users'][i]['dist_mat_file']);
-		
+
 		userNameMap[userJson['users'][i]['name']] = {};
 		for (var p in userJson['users'][i]) {
 			if (p!='scale_image') {
@@ -80,7 +80,9 @@ for (var i=0; i<userJson['users'].length; i++) {
 }
 
 var userHistories = {};
+var boundingHistories = {};
 
 exports.mapNameMap = mapNameMap;
 exports.userNameMap = userNameMap;
 exports.userHistories = userHistories;
+exports.boundingHistories = boundingHistories;

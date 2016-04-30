@@ -30,6 +30,7 @@ var express = require('express')
   , map = require('./routes/map')
   , localize = require('./routes/localize')
   , bounding = require('./routes/bounding')
+  , project = require('./routes/project')
   , http = require('http')
   , path = require('path')
   ;
@@ -58,6 +59,7 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
+app.get('/user', user.get);
 app.get('/user/list', user.list);
 app.get('/user/history', user.history);
 app.get('/map/structure', map.structure);
@@ -66,6 +68,8 @@ app.get('/map/dense', map.dense);
 app.get('/localize', localize.estimateGet);
 app.post('/localize', localize.estimatePost);
 app.post('/bounding', bounding.estimatePost);
+app.get('/bounding/history', bounding.history);
+app.get('/projectt', project.project);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

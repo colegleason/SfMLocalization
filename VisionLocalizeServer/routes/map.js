@@ -22,7 +22,7 @@
 
 var fs = require('fs'), share = require('../lib/share');
 
-exports.structure = function(req, res){  
+exports.structure = function(req, res){
 	var sendErrorResponse = function(code, message) {
 		res.statusCode = code;
 		res.setHeader("Content-Type", "application/json");
@@ -35,7 +35,7 @@ exports.structure = function(req, res){
 		console.log('Error : Map ID is not specified');
 		return sendErrorResponse(404, 'Map ID is not specified');
 	}
-	
+
     // check map parameter
     if (!share.mapNameMap[req.query.name]) {
     	console.log('Error : Map ID is not valid');
@@ -45,7 +45,7 @@ exports.structure = function(req, res){
     	console.log('Error : Map config does not have structure ply file');
     	return sendErrorResponse(500, 'Map config does not have structure ply file');
     }
-    
+
     var filePath = share.mapNameMap[req.query.name]["structure_ply_file"];
     var stat = fs.statSync(filePath);
     res.writeHead(200, {
@@ -57,7 +57,7 @@ exports.structure = function(req, res){
     readStream.pipe(res);
 };
 
-exports.camera = function(req, res){  
+exports.camera = function(req, res){
 	var sendErrorResponse = function(code, message) {
 		res.statusCode = code;
 		res.setHeader("Content-Type", "application/json");
@@ -70,7 +70,7 @@ exports.camera = function(req, res){
 		console.log('Error : Map ID is not specified');
 		return sendErrorResponse(404, 'Map ID is not specified');
 	}
-	
+
     // check map parameter
     if (!share.mapNameMap[req.query.name]) {
     	console.log('Error : Map ID is not valid');
@@ -80,7 +80,7 @@ exports.camera = function(req, res){
     	console.log('Error : Map config does not have camera ply file');
     	return sendErrorResponse(500, 'Map config does not have camera ply file');
     }
-    
+
     var filePath = share.mapNameMap[req.query.name]["camera_ply_file"];
     var stat = fs.statSync(filePath);
     res.writeHead(200, {
@@ -92,7 +92,7 @@ exports.camera = function(req, res){
     readStream.pipe(res);
 };
 
-exports.dense = function(req, res){  
+exports.dense = function(req, res){
 	var sendErrorResponse = function(code, message) {
 		res.statusCode = code;
 		res.setHeader("Content-Type", "application/json");
@@ -105,7 +105,7 @@ exports.dense = function(req, res){
 		console.log('Error : Map ID is not specified');
 		return sendErrorResponse(404, 'Map ID is not specified');
 	}
-	
+
     // check map parameter
     if (!share.mapNameMap[req.query.name]) {
     	console.log('Error : Map ID is not valid');
@@ -115,7 +115,7 @@ exports.dense = function(req, res){
     	console.log('Error : Map config does not have dense ply file');
     	return sendErrorResponse(500, 'Map config does not have dense ply file');
     }
-    
+
     var filePath = share.mapNameMap[req.query.name]["dense_ply_file"];
     var stat = fs.statSync(filePath);
     res.writeHead(200, {
