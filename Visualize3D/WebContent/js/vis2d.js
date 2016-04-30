@@ -20,12 +20,17 @@ function flattenPoints(geometry) {
 var MAP_NAME;
 var USER_NAME;
 var SFM_STRUCTURE_PLY_FILE;
+var DENSE_STRUCTURE_PLY_FILE;
 var SFM_CAMERA_PLY_FILE;
 var USER_HISTORY_JSON_FILE;
+var BOUNDING_HISTORY_JSON_FILE;
+var HOTSPOT_API_URL;
 var SERVER_URL = 'http://hulop.qolt.cs.cmu.edu:3000';
+var VIZMAP_SERVER_URL = 'http://hulop.qolt.cs.cmu.edu:5000';
 var LOCALIZE_API_URL = SERVER_URL + '/localize';
 var MAP_API_URL = SERVER_URL + '/map';
 var USER_API_URL = SERVER_URL + '/user';
+var BOUNDING_API_URL = SERVER_URL + '/bounding';
 var SHOW_GRID = true;
 var SHOW_SFM_CAMERA = true;
 var SHOW_DENSE_SCENE = false;
@@ -47,17 +52,24 @@ $(document).ready(function(){
     SFM_CAMERA_PLY_FILE = MAP_API_URL + '/camera?name=' + MAP_NAME;
     DENSE_STRUCTURE_PLY_FILE = MAP_API_URL + '/dense?name=' + MAP_NAME;
     USER_HISTORY_JSON_FILE = USER_API_URL + '/history?name=' + USER_NAME;
+    BOUNDING_HISTORY_JSON_FILE = BOUNDING_API_URL + '/history?name=' + USER_NAME;
+    HOTSPOT_API_URL = VIZMAP_SERVER_URL + '/hotspots';
 
     // objects for drawing
     var container;
     var renderer, controls, scene, camera, scene2d, camera2d, sparseScene, denseScene;
     var gridParent;
     var sfmCameraParent;
+    var sparseSceneParent;
     var denseSceneParent;
     var locCameraPointsParent;
+    var boundingPointsParent;
+    var hotspotsParent;
 
     // exec localize timer
-    var timer = null;
+    var userTimer = null;
+    var boundingTimer = null;
+    var hotspotTimer = null;
 
     prepareControl();
     init();
@@ -173,7 +185,7 @@ $(document).ready(function(){
 	var loader = new THREE.PLYLoader();
 	loader.addEventListener( 'load', function ( event ) {
 	    var geometry = event.content;
-            flattenPoints(geometry);
+            //flattenPoints(geometry);
 	    var materials = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors, transparent: true } );
 	    var particles = new THREE.PointCloud(geometry, materials);
 	    particles.colors = event.content.colors;
@@ -187,34 +199,37 @@ $(document).ready(function(){
 	var loader = new THREE.PLYLoader();
 	loader.addEventListener( 'load', function ( event ) {
 	    var geometry = event.content;
-            flattenPoints(geometry);
+            //flattenpoints(geometry);
 	    var materials = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors, transparent: true } );
 	    var particles = new THREE.PointCloud(geometry, materials);
 	    particles.colors = geometry.colors;
 	    sfmCameraParent.add( particles );
-
 	    loadUserHistory();
 	} );
 	loader.load( SFM_CAMERA_PLY_FILE );
 	scene.add(sfmCameraParent);
-
+        loadBoundingHistory();
+        loadHotspots();
 	// dense PLY file
-	denseSceneParent = new THREE.Object3D();
-	var loader = new THREE.PLYLoader();
-	loader.addEventListener( 'load', function ( event ) {
-	    var geometry = event.content;
-	    var materials = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors, transparent: true } );
-	    var particles = new THREE.PointCloud(geometry, materials);
-	    particles.colors = event.content.colors;
-	    denseSceneParent.add( particles );
-	} );
-	loader.load( DENSE_STRUCTURE_PLY_FILE );
-	scene.add(denseSceneParent);
+	// denseSceneParent = new THREE.Object3D();
+	// var loader = new THREE.PLYLoader();
+	// loader.addEventListener( 'load', function ( event ) {
+	//     var geometry = event.content;
+	//     var materials = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors, transparent: true } );
+	//     var particles = new THREE.PointCloud(geometry, materials);
+	//     particles.colors = event.content.colors;
+	//    denseSceneParent.add( particles );
+	//  } );
+	//  loader.load( DENSE_STRUCTURE_PLY_FILE );
+	//  scene.add(denseSceneParent);
 
 	// prepare camera points parent
 	locCameraPointsParent = new THREE.Object3D();
 	scene.add(locCameraPointsParent);
-
+        boundingPointsParent = new THREE.Object3D();
+	scene.add(boundingPointsParent);
+        hotspotsParent = new THREE.Object3D();
+	scene.add(hotspotsParent);
 	// renderer
 	renderer = new THREE.WebGLRenderer( { antialias: true } );
 	renderer.autoClear = false; // To draw 2D, disable auto clear and call clear manually
@@ -269,7 +284,7 @@ $(document).ready(function(){
 	requestAnimationFrame( animate );
 
 	sparseSceneParent.visible = SHOW_DENSE_SCENE ? false : true;
-	denseSceneParent.visible = SHOW_DENSE_SCENE ? true : false;
+	//denseSceneParent.visible = SHOW_DENSE_SCENE ? true : false;
 	gridParent.visible = SHOW_GRID ? true : false;
 	sfmCameraParent.visible = SHOW_SFM_CAMERA ? true : false;
 
@@ -281,8 +296,7 @@ $(document).ready(function(){
     }
 
     function loadUserHistory(){
-    	if (timer!=null) clearInterval(timer);
-
+    	if (userTimer!=null) clearInterval(userTimer);
     	/*
 	 timer = setInterval(function(){
 	 $.ajax({
@@ -311,7 +325,7 @@ $(document).ready(function(){
 	    avatarmat:{color:color, opacity: .9, transparent:true},
 	    camoffs: new THREE.Vector3(0,0,1.5)
 	});
-   	timer = setInterval(function(){
+   	userTimer = setInterval(function(){
    	    $.ajax({
    		type: "GET",
    		url: USER_HISTORY_JSON_FILE,
@@ -326,10 +340,77 @@ $(document).ready(function(){
    			var result = data[data.length-1]["estimate"];
    			drawShape(locCameraPointsParent, avatar.clone(), result["t"][0], result["t"][1], result["t"][2], result["R"], 0xFF0000);
    		    }
-   		}
+   		},
+                failure: console.log,
    	    });
-   	}, 1000);
+   	}, 2000);
     }
+
+    function loadBoundingHistory(){
+    	if (boundingTimer!=null) clearInterval(boundingTimer);
+   	boundingTimer = setInterval(function(){
+   	    $.ajax({
+   		type: "GET",
+   		url: BOUNDING_HISTORY_JSON_FILE,
+   		dataType: "json",
+   		success: function(jsonData) {
+   		    var data = jsonData["history"];
+                    if (data.length > 0) {
+                        for(var i=boundingPointsParent.children.length-1; i>=0; i--){
+   			    boundingPointsParent.remove(boundingPointsParent.children[i]);
+   			};
+                        var boundingPointCloudMaterial = new THREE.PointCloudMaterial({
+      	                    color: 0xFF0000,
+      	                    size: 0.125
+    	                });
+
+                        data.forEach(function(result) {
+                            result.boundingBoxResults.forEach(function(boundingBox) {
+	                        var boundingPoints = new THREE.Geometry();
+                                boundingBox.forEach(function(point) {
+                                    boundingPoints.vertices.push(new THREE.Vector3(point.x, point.y, point.z));
+
+                                });
+                                var boundingPointCloud = new THREE.PointCloud(boundingPoints, boundingPointCloudMaterial);
+	                        boundingPointsParent.add(boundingPointCloud);
+                            });
+                        });
+                    }
+   		},
+                error: console.log,
+   	    });
+   	}, 2000);
+    }
+
+        function loadHotspots(){
+    	    if (hotspotTimer!=null) clearInterval(boundingTimer);
+   	    hotspotTimer = setInterval(function(){
+   	        $.ajax({
+   		    type: "GET",
+   		    url: HOTSPOT_API_URL,
+   		    dataType: "json",
+   		    success: function(jsonData) {
+   		        var data = jsonData["hotspots"];
+                        if (data.length > 0) {
+                            for(var i=hotspotsParent.children.length-1; i>=0; i--){
+   			        hotspotsParent.remove(hotspotsParent.children[i]);
+   			    };
+                            var hotspotMaterial = new THREE.PointCloudMaterial({
+      	                        color: 0x0000FF,
+      	                        size: 0.5
+    	                    });
+                            var hotspots = new THREE.Geometry();
+                            data.forEach(function(hotspot) {
+                                hotspots.vertices.push(new THREE.Vector3(hotspot.x, hotspot.y, hotspot.z));
+                            });
+                            var pointCloud = new THREE.PointCloud(hotspots, hotspotMaterial);
+                            hotspotsParent.add(pointCloud);
+                        }
+   		    },
+                    error: console.log,
+   	        });
+   	    }, 2000);
+        }
 
     function __get_control_container(container){
         var ret = container.find(".controlcontainer");
@@ -451,9 +532,8 @@ $(document).ready(function(){
     }
 
     function drawShape(parent, shape, x, y, z, rotMat, color) {
-        var FLIP_Z_ROTATE = true;
+        var FLIP_Z_ROTATE = false;
         var size = 0.3;
-
         if (FLIP_Z_ROTATE) {
 	    shape.applyMatrix(new THREE.Matrix4().set(rotMat[0][0], -rotMat[0][1], -rotMat[0][2], x,
             				              -rotMat[1][0], rotMat[1][1], rotMat[1][2], y,
