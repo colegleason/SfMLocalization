@@ -6,10 +6,13 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "async": "^2.0.0-rc.3",
+    "bindings": "1.2.1",
     "express": "3.2.6",
     "jade": "*",
+    "mongodb": "2.1.2",
+    "request": "^2.72.0",
     "validator": "4.2.0",
-    "bindings":"1.2.1",
-    "mongodb":"2.1.2"
+    "js-yaml": "~3.6.0"
   }
 }
