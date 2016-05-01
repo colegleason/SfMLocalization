@@ -19,11 +19,10 @@
       		"../VisionLocalizeCommon/src/PcaWrapper.cpp",
       		"../VisionLocalizeBeaconCommon/src/BeaconUtils.cpp"
       	    ],
-	    "cflags_cc" : [ "-O0 -g3 -Wall -c -fmessage-length=0 -std=c++11 -fopenmp -fexceptions" ],
+	    "cflags_cc" : [ "-O0 -g3 -Wall -c -fmessage-length=0 -std=c++11 -fopenmp -fexceptions -DEIGEN_MPL2_ONLY" ],
 	    "cflags_cc!" : [ "-fno-rtti" ],
             "include_dirs": [
       		"/usr/local/include/openMVG_dependencies/cereal/include",
-                "/opt/opencv-3.0.0/include",
 		"/usr/include/eigen3",
 		"/usr/local/include/openMVG/third_party",
 		"/usr/local/include/openMVG",
@@ -36,9 +35,9 @@
 		"../VisionLocalizeBeaconCommon/src"
       	    ],
             "library_dirs": [
-      		"/usr/lib/x86_64-linux-gnu",
-		"/usr/local/lib",
-      		"/opt/opencv-3.0.0/lib"
+      	        "/usr/lib/x86_64-linux-gnu",
+                "/opt/opencv-3.1.0/lib",
+	        "/usr/local/lib"
       	    ],
             "libraries": [
 	      	"-lopenMVG_sfm",
@@ -60,9 +59,6 @@
 		"-lopenMVG_kvld",
 		"-lstlplus",
 		"-lceres",
-		"-lcxsparse",
-		"-lcholmod",
-		"-lglog",
 		"-llapack",
 		"-lblas",
 		"-lgomp",
@@ -74,11 +70,11 @@
 		"-llib_CoinUtils",
 		"-llib_Osi",
 		"-llib_clp",
-		"-lvlsift",
 		"-lflann_cpp_s",
 		"-llemon",
 		"-leasyexif",
-		"-luuid"
+		"-luuid",
+                "-lglog"
       	    ]
         }
     ]
