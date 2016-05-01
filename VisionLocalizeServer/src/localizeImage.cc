@@ -499,13 +499,14 @@ Handle<Value> LocalizeImagePathBeacon(const Arguments& args) {
 
 Handle<Value> project3Dto2D(const Arguments& args) {
     HandleScope scope;
-
+    cout <<"project3Dto2D" << endl;
     if (args.Length() != 5) {
         ThrowException(
                        Exception::TypeError(String::New("Wrong number of arguments")));
         return scope.Close(Undefined());
     }
-    if (!args[0]->IsString() || !args[1]->IsString()) {
+    if (!args[0]->IsString() || !args[1]->IsString() || !args[2]->IsArray() ||
+        !args[3]->IsArray() || !args[4]->IsArray()) {
         ThrowException(Exception::TypeError(String::New("Wrong arguments")));
         return scope.Close(Undefined());
     }
@@ -517,6 +518,7 @@ Handle<Value> project3Dto2D(const Arguments& args) {
     {
         cv::FileStorage storage(std::string(kMatFileChar), cv::FileStorage::READ);
         storage["K"] >> cameraMatrix;
+        cout << "cameraMatrix = " << cameraMatrix << endl;
         storage.release();
     }
 
@@ -526,26 +528,29 @@ Handle<Value> project3Dto2D(const Arguments& args) {
     {
         cv::FileStorage storage(std::string(distMatFileChar), cv::FileStorage::READ);
         storage["dist"] >> distCoeffs;
+        cout << "distCoeffs = " << distCoeffs << endl;
         storage.release();
     }
 
-    cv::Mat R;
+    cv::Mat R = cv::Mat::zeros(3, 3, CV_64F);
     Local<Array> Rarray = Local<Array>::Cast(args[2]);
     for (unsigned int i = 0; i < Rarray->Length(); i++) {
         Local<Array> row = Local<Array>::Cast(Rarray->Get(i));
         for (unsigned int j = 0; j < row->Length(); j++) {
-            R.at<double>(i,j) = (double) row->Get(j)->NumberValue();
+            double n = row->Get(j)->NumberValue();
+            R.at<double>(i,j) = n;
         }
     }
-    cout << "R = " << R << endl;
+
     // convert Rotation matrix from 3x3 to 3x1 vector
-    cv::Vec3f rvec;
+    cv::Mat rvec = cv::Mat::zeros(1,3,CV_64F);
     cv::Rodrigues(R, rvec);
 
-    cv::Vec3f tvec;
+    cv::Mat tvec = cv::Mat::zeros(1,3,CV_64F);
     Local<Array> tarray = Local<Array>::Cast(args[3]);
     for (unsigned int i = 0; i < tarray->Length(); i++) {
-        tvec[i] = (float) tarray->Get(i)->NumberValue();
+        double n = tarray->Get(i)->NumberValue();
+        tvec.at<double>(0,i) = n;
     }
 
     Local<Array> pointsArray = Local<Array>::Cast(args[4]);
@@ -555,7 +560,8 @@ Handle<Value> project3Dto2D(const Arguments& args) {
         float x = point->Get(0)->NumberValue(),
             y = point->Get(1)->NumberValue(),
             z = point->Get(2)->NumberValue();
-        points.push_back(cv::Vec3f{x,y,z});
+        cv::Vec3f p = cv::Vec3f{x,y,z};
+        points.push_back(p);
     }
 
     // project points to image

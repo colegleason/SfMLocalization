@@ -27,8 +27,6 @@
 var validator = require('validator'), async = require('async'), request = require('request'), fs = require('fs'),
 	localizeImage = require('bindings')('localizeImage'), share = require('../lib/share');
 
-var MAX_USER_HISTORY_LENGTH = 10;
-
 /*
  * POST parameters
  *  user : ID of user
@@ -42,7 +40,7 @@ var MAX_USER_HISTORY_LENGTH = 10;
  *  radius : center to restrict localization area (optional)
  *  beacon : iBeacon signal for query image (optional)
  */
-exports.project = function(req, res) {
+exports.postImage = function(req, res) {
     var sendErrorResponse = function(code, message) {
         res.statusCode = code;
         res.setHeader("Content-Type", "application/json");
@@ -69,7 +67,7 @@ exports.project = function(req, res) {
     }
 
     // check points parameter
-    if (!Array.isArray(req.body.points) || req.body.bounding.length <= 0) {
+    if (!Array.isArray(req.body.points) || req.body.points.length <= 0) {
     	console.log('Error : Points not specified');
         return sendErrorResponse(404, 'Points not specified');
     }
@@ -124,30 +122,30 @@ exports.project = function(req, res) {
             });
         },
         function(image, callback) {
-            var estimate = localizeImage.localizeImageBufferBeacon(
-                req.query.user, kMatFile, distMatFile, scaleImage,
-	        req.query.map, sfmDataDir, matchDir, aMatFile, image, req.query.beacon
-            );
+            var estimate = localizeImage.localizeImageBuffer(req.body.user, kMatFile, distMatFile, scaleImage,
+	                    		               req.body.map, sfmDataDir, matchDir, aMatFile, image);
             if (!estimate || estimate.length == 0) {
                 return callback(new Error("could not localize"), null);
             } else {
                 var t = estimate.slice(0,3);
-                var R = [result.slice(3,6),result.slice(6,9),result.slice(9,12)];
+                var R = [estimate.slice(3,6),
+                         estimate.slice(6,9),
+                         estimate.slice(9,12)];
                 return callback(null, R, t);
             }
         },
         function(R, t, callback) {
+            console.log(R, t, points);
             var result = localizeImage.project3Dto2D(kMatFile, distMatFile, R, t, points);
-            console.log(result)l
             var jsonObj = {'imagePoints':result};
             // Send back the result as a JSON
             return callback(null, JSON.stringify(jsonObj));
         }], function(err, result) {
         if (err) {
-            sendErrorResponse(500, err.message);
+            return sendErrorResponse(500, err.message);
         }
         res.setHeader("Content-Type", "application/json");
-        res.header("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Origin", "*");
         res.write(result);
         res.end();
     });
